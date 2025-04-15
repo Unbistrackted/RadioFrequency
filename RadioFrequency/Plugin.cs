@@ -5,6 +5,7 @@ using Exiled.API.Features.Core.UserSettings;
 using HarmonyLib;
 using PlayerRoles;
 using RadioFrequency.Features;
+using RueI;
 
 namespace RadioFrequency
 {
@@ -25,6 +26,7 @@ namespace RadioFrequency
             Singleton = this;
             _harmony = new Harmony("fr.bolton.radiofrequency");
             _harmony.PatchAll();
+            RueIMain.EnsureInit();
 
             if (Config.UseDefaultRadio)
             {

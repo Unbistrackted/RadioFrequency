@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
 using RadioFrequency.Features;
+using RueI.Displays;
+using RueI.Elements;
+using RueI.Extensions;
 using UserSettings.ServerSpecific;
 
 namespace RadioFrequency
@@ -82,9 +86,13 @@ namespace RadioFrequency
             if (!Player.TryGet(hub, out Player player)) 
                 return;
 
+            DisplayCore core = DisplayCore.Get(hub);
+            SetElement element;
+
             if (player.Items.All(i => i.Type != ItemType.Radio))
             {
-                player.ShowHint(Plugin.Singleton.Config.NoRadioHint);
+                element = new SetElement(500, Plugin.Singleton.Config.NoRadioHint);
+                core.AddTemp(element, TimeSpan.FromSeconds(2), new RueI.Displays.Scheduling.TimedElemRef<SetElement>());
                 return;
             }
 
@@ -104,7 +112,8 @@ namespace RadioFrequency
                 }
             }
 
-            player.ShowHint(Plugin.Singleton.Config.ChangedFrequencyHint.Replace("{radio_frequency}", nextFrequency.Name));
+            element = new SetElement(500, Plugin.Singleton.Config.ChangedFrequencyHint.Replace("{radio_frequency}", nextFrequency.Name));
+            core.AddTemp(element, TimeSpan.FromSeconds(2), new RueI.Displays.Scheduling.TimedElemRef<SetElement>());
         }
     }
 }
