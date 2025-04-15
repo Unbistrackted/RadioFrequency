@@ -9,6 +9,8 @@ using RueI.Displays;
 using RueI.Elements;
 using RueI.Extensions;
 using UserSettings.ServerSpecific;
+using MEC;
+using RueI.Displays.Scheduling;
 
 namespace RadioFrequency
 {
@@ -83,16 +85,24 @@ namespace RadioFrequency
             if (settingBase is not SSKeybindSetting keybindSetting || keybindSetting.SettingId != Plugin.Singleton.Config.KeybindId || !keybindSetting.SyncIsPressed)
                 return;
 
-            if (!Player.TryGet(hub, out Player player)) 
+            if (!Player.TryGet(hub, out Player player))
                 return;
 
             DisplayCore core = DisplayCore.Get(hub);
             SetElement element;
+            Display display = new(core);
+            TimedElemRef<SetElement> ref1 = new TimedElemRef<SetElement>();
+
+            if (!player.SessionVariables.ContainsKey("RueITimedRef"))
+                player.SessionVariables.Add("RueITimedRef", ref1);
+
+            core.RemoveReference((TimedElemRef<SetElement>)player.SessionVariables["RueITimedRef"]);
 
             if (player.Items.All(i => i.Type != ItemType.Radio))
             {
                 element = new SetElement(500, Plugin.Singleton.Config.NoRadioHint);
-                core.AddTemp(element, TimeSpan.FromSeconds(2), new RueI.Displays.Scheduling.TimedElemRef<SetElement>());
+                core.AddTemp(element, TimeSpan.FromSeconds(3), ref1);
+                player.SessionVariables["RueITimedRef"] = ref1;
                 return;
             }
 
@@ -113,7 +123,8 @@ namespace RadioFrequency
             }
 
             element = new SetElement(500, Plugin.Singleton.Config.ChangedFrequencyHint.Replace("{radio_frequency}", nextFrequency.Name));
-            core.AddTemp(element, TimeSpan.FromSeconds(2), new RueI.Displays.Scheduling.TimedElemRef<SetElement>());
+            core.AddTemp(element, TimeSpan.FromSeconds(3), ref1);
+            player.SessionVariables["RueITimedRef"] = ref1;
         }
     }
 }
